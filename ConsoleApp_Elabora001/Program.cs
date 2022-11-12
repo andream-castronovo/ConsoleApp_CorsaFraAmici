@@ -6,16 +6,24 @@ namespace ConsoleApp_Elabora001
     internal class Program
     {
         static int var;
+        static System.Diagnostics.Stopwatch sw;
+
+        // Oggetto generico da usare come "testimone"
+        static object _lock0 = new object();
 
         static void Elabora01()
         {
             Console.WriteLine($"\nStarting {Thread.CurrentThread.Name} with ID {Thread.CurrentThread.ManagedThreadId}");
             int v;
+            
             for (int i = 1; i <= 100; i++)
             {
-                v = var;
-                Thread.Sleep(10);
-                var = v + 1;
+                lock (_lock0)
+                { // Prende il testimone: Lock
+                    v = var;
+                    Thread.Sleep(10);
+                    var = v + 1;
+                } // Lascia il testimone: Unlock
             }
         }
 
@@ -26,13 +34,16 @@ namespace ConsoleApp_Elabora001
             int v;
             for (int i = 1; i <= 100; i++)
             {
-                v = var;
-                Thread.Sleep(5);
-                var = v + 1;
+                lock (_lock0)
+                {
+                    v = var;
+                    Thread.Sleep(5);
+                    var = v + 1;
+                }
                 Thread.Sleep(1);
             }
         }
-
+        
         static void Main(string[] args)
         {
             
