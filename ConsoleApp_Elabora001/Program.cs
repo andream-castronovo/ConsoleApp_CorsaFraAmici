@@ -10,7 +10,7 @@ namespace ConsoleApp_Elabora001
 
         // Oggetto generico da usare come "testimone"
         static object _lock0 = new object();
-
+        
         static void Elabora01()
         {
             Console.WriteLine($"\nStarting {Thread.CurrentThread.Name} with ID {Thread.CurrentThread.ManagedThreadId}");
