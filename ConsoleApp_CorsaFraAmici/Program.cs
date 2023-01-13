@@ -12,10 +12,11 @@ namespace ConsoleApp_CorsaFraAmici
         static int classifica = 0;
 
         static object _lock = new object();
+        static object _lockThread = new object();
 
-        // TODO FATTO Stampare lo stato dei thread in tempo reale affianco al nome del corridore
-        // TODO FATTO Stampare lo stato di vita del thread da qualche parte
-        // TODO FATTO Fare metodo per scrivere che incorpora lock set cursor e write
+        // FATTO Stampare lo stato dei thread in tempo reale affianco al nome del corridore
+        // FATTO Stampare lo stato di vita del thread da qualche parte
+        // FATTO Fare metodo per scrivere che incorpora lock set cursor e write
         
         // TODO Fare metodo per aggiornare la classifica all'arrivo
 
@@ -39,16 +40,7 @@ namespace ConsoleApp_CorsaFraAmici
                 //  @"  ╙",
                 int testaAndrea = 3;
 
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posAndrea, testaAndrea + 2, @"  ╙");
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posAndrea, testaAndrea + 1, @" /║\");
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posAndrea, testaAndrea, @"  A");
-
+                DisegnaCorpo(posAndrea, testaAndrea, @"  A", @" /║\", @"  ╙");
 
             } while (posAndrea < 115);
 
@@ -69,16 +61,7 @@ namespace ConsoleApp_CorsaFraAmici
                 // @"  ╨"
 
                 int testaBaldo = 7;
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posBaldo, testaBaldo + 2, @"  ╨");
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posBaldo, testaBaldo + 1, @" └║┘");
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posBaldo, testaBaldo, @"  B");
-
+                DisegnaCorpo(posBaldo, testaBaldo, @"  B", @" └║┘", @"  ╨");
 
             } while (posBaldo < 115);
 
@@ -91,24 +74,26 @@ namespace ConsoleApp_CorsaFraAmici
 
         }
 
+        private static void DisegnaCorpo(int x, int y, string testa, string corpo, string gambe)
+        {
+            Thread.Sleep(50);
+            ScriviCondiviso(_lock, x, y + 2, gambe);
+
+            Thread.Sleep(50);
+            ScriviCondiviso(_lock, x, y + 1, corpo);
+
+            Thread.Sleep(50);
+            ScriviCondiviso(_lock, x, y, testa);
+        }
+
         static void Carlo()
         {
             do
             {
                 posCarlo++;
-
-
-
                 int testaCarlo = 11;
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posCarlo, testaCarlo + 2, @" / \");
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posCarlo, testaCarlo + 1, @" /|\");
-
-                Thread.Sleep(50);
-                ScriviCondiviso(_lock, posCarlo, testaCarlo, @"  C");
+                
+                DisegnaCorpo(posCarlo, testaCarlo, @"  C", @" /|\", @" / \");
 
             } while (posCarlo < 115);
 
@@ -158,171 +143,229 @@ namespace ConsoleApp_CorsaFraAmici
         
         // Sviluppare un menù che una volta selezionato un corridore abiliti alle seguenti opzioni:
         
-        // Abort per uccidere il corridore
-        // Suspend per fermare temporaneamente il corridore
-        // Resume per far riprendere il corridore
-        // Join per far aspettare un altro corridore a quello selezionato.
+        // Abort per uccidere il corridore (K)
+        // Suspend per fermare temporaneamente il corridore (S)
+        // Resume per far riprendere il corridore (R)
+        // Join per far aspettare un altro corridore a quello selezionato. (J)
 
         static void StampaMenuPrincipale()
         {
             int[] coordinatePrecedenti = { Console.CursorLeft, Console.CursorTop };
 
-            Console.SetCursorPosition(coordinateMenu[0], coordinateMenu[1]);
-            
-            Console.WriteLine(" MENU'");
-
-            Console.SetCursorPosition(coordinateMenu[0]+1, Console.CursorTop);
-            Console.WriteLine(" |- A) Andrea");
-
-            Console.SetCursorPosition(coordinateMenu[0]+1, Console.CursorTop);
-            Console.WriteLine(" |- B) Baldo");
-
-            Console.SetCursorPosition(coordinateMenu[0]+1, Console.CursorTop);
-            Console.WriteLine(" |- C) Carlo");
+            ScriviCondiviso(_lock, coordinateMenu[0], coordinateMenu[1], " MENU'\n");
+            ScriviCondiviso(_lock, coordinateMenu[0] + 1, Console.CursorTop, " |- A) Andrea\n");
+            ScriviCondiviso(_lock, coordinateMenu[0] + 1, Console.CursorTop, " |- B) Baldo\n");
+            ScriviCondiviso(_lock, coordinateMenu[0] + 1, Console.CursorTop, " |- C) Carlo\n");
 
             Console.SetCursorPosition(coordinatePrecedenti[0], coordinatePrecedenti[1]);
         }
 
-        static void StampaMenuCorridore(Thread corridore)
+        static void StampaMenuCorridore(char c)
         {
-
-            
             int[] coordinatePrecedenti = { Console.CursorLeft, Console.CursorTop };
 
             int[] coordinateMenuCorridore = { coordinateMenu[0]+25, coordinateMenu[1] };
 
             string nomeCorridore = "";
 
-            Console.SetCursorPosition(coordinateMenuCorridore[0], coordinateMenuCorridore[1]);
-            Console.WriteLine("Seleziona azione da compiere su " + nomeCorridore);
-            
-            Console.SetCursorPosition(coordinateMenuCorridore[0], Console.CursorTop);
-            Console.WriteLine("S) Suspend");
-            
-            Console.SetCursorPosition(coordinateMenuCorridore[0], Console.CursorTop);
-            Console.WriteLine("K) Abort");
+            switch (c)
+            {
+                case 'A':
+                    nomeCorridore = "Andrea";
+                    break;
+                case 'B':
+                    nomeCorridore = "Baldo";
+                    break;
+                case 'C':
+                    nomeCorridore = "Carlo";
+                    break;
+                default:
+                    throw new Exception("Corridore non valido");
+            }
 
-            Console.SetCursorPosition(coordinateMenuCorridore[0], Console.CursorTop);
-            Console.WriteLine("R) Resume");
-            
-            Console.SetCursorPosition(coordinateMenuCorridore[0], Console.CursorTop);
-            Console.WriteLine("J) Join");
+            ScriviCondiviso(_lock, coordinateMenuCorridore[0], coordinateMenuCorridore[1], "Seleziona azione da compiere su " + nomeCorridore + "   \n");
+
+            ScriviCondiviso(_lock, coordinateMenuCorridore[0], Console.CursorTop, "S) Suspend\n");
+            ScriviCondiviso(_lock, coordinateMenuCorridore[0], Console.CursorTop, "K) Abort\n");
+            ScriviCondiviso(_lock, coordinateMenuCorridore[0], Console.CursorTop, "R) Resume\n");
+            ScriviCondiviso(_lock, coordinateMenuCorridore[0], Console.CursorTop, "J) Join\n");
 
             Console.SetCursorPosition(coordinatePrecedenti[0], coordinatePrecedenti[1]);
         }
-        
+
+        [Obsolete]
         static void EseguiAzione(char azione, Thread tCorridore)
         {
-
+            if (!tCorridore.IsAlive)
+                return;
+            
             // TODO: Completare le azioni
             switch (azione)
             {
+                // J Join ...
+
+                // K Abort ✔
+                // S Suspend ✔
+                // R Resume ✔
                 case 'J':
+                    corridorePerJoin = true;
                     break;
                 case 'K':
+                    if (tCorridore.ThreadState == ThreadState.Suspended)
+                        tCorridore.Resume();
+                    tCorridore.Abort();
                     break;
                 case 'S':
+                    if (tCorridore.ThreadState == ThreadState.Suspended || !tCorridore.IsAlive)
+                        return;
+                    tCorridore.Suspend();
                     break;
                 case 'R':
+                    if (tCorridore.ThreadState != ThreadState.Suspended || !tCorridore.IsAlive) 
+                        return;
+                    tCorridore.Resume();
                     break;
+                    
             }
 
         }
+        [Obsolete]
+        static void AzioneJoin(Thread tCorridoreCheAspetta, Thread tCorridoreDaAspettare)
+        {
+            if (!tCorridoreCheAspetta.IsAlive)
+                return;
 
+            tCorridoreCheAspetta.Suspend();
+
+            while (tCorridoreDaAspettare.IsAlive)
+            {
+
+            }
+               
+            if (tCorridoreCheAspetta.ThreadState == ThreadState.Suspended || tCorridoreCheAspetta.ThreadState == ThreadState.SuspendRequested)
+                tCorridoreCheAspetta.Resume();
+            
+            
+            Thread.CurrentThread.Abort();
+        }
+
+        static Thread tAndrea = new Thread(Andrea) { Name = "Andrea" };
+        static Thread tBaldo = new Thread(Baldo) { Name = "Baldo" };
+        static Thread tCarlo = new Thread(Carlo) { Name = "Carlo" };
+
+        [Obsolete]
         static void Main(string[] args)
         {
             Console.CursorVisible = false;
-            Thread tAndrea = new Thread(Andrea);
+            
 
-            Thread tBaldo = new Thread(Baldo);
-
-
-            Thread tCarlo = new Thread(Carlo);
-
+            Thread tMenu = new Thread(GestisciMenu);
             Pronti();
 
-            StampaMenuPrincipale();
+            tMenu.Start();
 
-            while (true)
+
+            #region Comment
+            // Stampa iniziale
+            StampaStatiThread(tAndrea, tBaldo, tCarlo);
+
+
+            ScriviCondiviso(_lock, 0, 16, "Clicca un tasto per far partire i corridori\n");
+            Console.ReadKey(true);
+            ScriviCondiviso(_lock, 0, 16, "                                                                         ");
+
+            // Essendo la Console una risorsa condivisa, non possono scrivere tutti allo stesso tempo,
+            // c'è bisogno di un semaforo che "guidi" la scrittura.
+
+
+            tAndrea.Start(); // Esegue il codice nel metodo che gli abbiamo passato
+            tBaldo.Start();
+            tCarlo.Start();
+
+            // Stampa in tempo reale
+            while (tAndrea.IsAlive || tBaldo.IsAlive || tCarlo.IsAlive)
             {
-                // TODO: Sistemare un po' il codice
-                char c;
-                do
-                {
-                    c = Console.ReadKey(true).KeyChar;
-                    if (c >= 97 && c <= 99)
-                        c = (char)(c - 32);
-                } while (c < 65 || c > 67);
-
-                Thread corridoreScelto = null;
-                switch (c)
-                {
-                    case 'A':
-                        corridoreScelto = tAndrea;
-                        break;
-                    case 'B':
-                        corridoreScelto = tBaldo;
-                        break;
-                    case 'C':
-                        corridoreScelto = tCarlo;
-                        break;
-                }
-
-                StampaMenuCorridore(corridoreScelto);
-
-                char a;
-                do
-                {
-                    // Sommando 32 si ottiene la minuscola
-                    // J = 74
-                    // K = 75
-                    // S = 83
-                    // R = 82
-
-                    a = Console.ReadKey(true).KeyChar;
-                    if (a >= 97)
-                        a = (char)(a - 32);
-                } while (a != 74 && a != 75 && a != 82 && a != 83);
-
-
-                
-                
-                
-                
+                StampaStatiThread(tAndrea, tBaldo, tCarlo);
             }
 
+            // Stampa finale
+            StampaStatiThread(tAndrea, tBaldo, tCarlo);
+            #endregion
 
-            //// Stampa iniziale
-            //StampaStatiThread(tAndrea, tBaldo, tCarlo);
-
-            //Console.SetCursorPosition(0, 14);
-            //Console.WriteLine("\n\nClicca un tasto per far partire i corridori");
-            //Console.ReadKey(true);
-            //Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
-            //Console.WriteLine("                                                                 ");
-
-            //// Essendo la Console una risorsa condivisa, non possono scrivere tutti allo stesso tempo,
-            //// c'è bisogno di un semaforo che "guidi" la scrittura.
-
-
-            //tAndrea.Start(); // Esegue il codice nel metodo che gli abbiamo passato
-            //tBaldo.Start();
-            //tCarlo.Start();
-
-            //// Stampa in tempo reale
-            //while (tAndrea.IsAlive || tBaldo.IsAlive || tCarlo.IsAlive)
-            //{
-            //    StampaStatiThread(tAndrea, tBaldo, tCarlo);
-            //}
-
-            //// Stampa finale
-            //StampaStatiThread(tAndrea, tBaldo, tCarlo);
+            tMenu.Abort();
 
             Console.SetCursorPosition(0, coordinateMenu[1]+6);
             Console.WriteLine("\t\nProgramma finito, premi invio per terminare");
             Console.ReadLine();
         }
 
+        static Thread tCorridoreSelezionato;
+        static Thread tCorridoreSelezionatoPerJoin;
+
+        static bool corridorePerJoin = false;
+        [Obsolete]
+        static void GestisciMenu()
+        {
+            StampaMenuPrincipale();
+            bool corridoreScelto = false;
+            do
+            {
+                char c = Console.ReadKey(true).KeyChar;
+
+                if (c >= 97)
+                    c = (char)(c - 32);
+
+                if (c >= 65 && c < 68)
+                {
+                    if (corridorePerJoin)
+                    {
+                        switch (c)
+                        {
+                            case 'A':
+                                tCorridoreSelezionatoPerJoin = tAndrea;
+                                break;
+                            case 'B':
+                                tCorridoreSelezionatoPerJoin = tBaldo;
+                                break;
+                            case 'C':
+                                tCorridoreSelezionatoPerJoin = tCarlo;
+                                break;
+                        }
+
+                        new Thread ( () => AzioneJoin(tCorridoreSelezionato, tCorridoreSelezionatoPerJoin)).Start();
+                        corridorePerJoin = false;
+                    }
+                    else
+                    {
+                        Thread tSelezionatoVecchio = tCorridoreSelezionato;
+                        switch (c)
+                        {
+                            case 'A':
+                                tCorridoreSelezionato = tAndrea;
+                                break;
+                            case 'B':
+                                tCorridoreSelezionato = tBaldo;
+                                break;
+                            case 'C':
+                                tCorridoreSelezionato = tCarlo;
+                                break;
+                        }
+                        if (tCorridoreSelezionato.IsAlive)
+                        {
+                            StampaMenuCorridore(c);
+                            corridoreScelto = true;
+                        }
+                        else
+                        {
+                            tCorridoreSelezionato = tSelezionatoVecchio;
+                        }
+                    }
+                }
+                else if (corridoreScelto && (c == 'J' || c == 'K' || c == 'S' || c == 'R'))
+                    EseguiAzione(c, tCorridoreSelezionato);
+              
+            } while (true);
+        }
 
         // Il codice era ridondante e quindi l'ho inserito in un metodo
         static void StampaStatiThread(Thread tAndrea, Thread tBaldo, Thread tCarlo)
@@ -338,12 +381,12 @@ namespace ConsoleApp_CorsaFraAmici
             lock (lck)
             {
                 Console.SetCursorPosition(posX, posY);
-                Console.Write($"Stato thread: {th.ThreadState}      ");
+                Console.Write($"Stato thread: {th.ThreadState}                               ");
 
             }    
             lock (lck)
             {
-                Console.SetCursorPosition(posX + 40, posY);
+                Console.SetCursorPosition(posX + 60, posY);
                 Console.Write($"IsAlive: {th.IsAlive}      ");
             }
         }
