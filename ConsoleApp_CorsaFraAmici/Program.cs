@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Security.Cryptography;
 using System.Threading;
 
 namespace ConsoleApp_CorsaFraAmici
 {
     class Program
     {
-        // Programmato da: Andrea Maria Castronovo - Classe: 4°I - Data creazione: Oct 29, 2022 - Data consegna: 28/01/2023
+        // Programmato da: Andrea Maria Castronovo - Classe: 4°I - Data inizio: 29/10/2022 - Data consegna: 04/02/2023
 
         #region Campi di classe
         // Posizioni dei corridori
@@ -36,47 +35,6 @@ namespace ConsoleApp_CorsaFraAmici
 
         #endregion
 
-        [Obsolete] // Obsolete è per evitare di avere la segnalazione che t.Suspend() e t.Resume() sono obsoleti
-        static void Main(string[] args)
-        {
-            Console.Title = "Programmato da: Andrea Maria Castronovo - Classe: 4°I";
-            
-            Console.CursorVisible = false;
-
-            Thread tMenu = new Thread(GestisciMenu);
-            Pronti();
-
-            tMenu.Start();
-            
-            // Stampa iniziale
-            StampaStatiThread(tAndrea, tBaldo, tCarlo);
-
-            ScriviCondiviso(_lockConsole, 0, 16, "Clicca un tasto per far partire i corridori\n");
-            Console.ReadKey(true);
-            ScriviCondiviso(_lockConsole, 0, 16, "                                                                         ");
-
-            // Essendo la Console una risorsa condivisa, non possono scrivere tutti allo stesso tempo,
-            // c'è bisogno di un semaforo che "guidi" la scrittura.
-
-            tAndrea.Start(); // Esegue il codice nel metodo che gli abbiamo passato
-            tBaldo.Start();
-            tCarlo.Start();
-
-            // Stampa in tempo reale
-            while (tAndrea.IsAlive || tBaldo.IsAlive || tCarlo.IsAlive)
-            {
-                StampaStatiThread(tAndrea, tBaldo, tCarlo);
-            }
-
-            // Stampa finale
-            StampaStatiThread(tAndrea, tBaldo, tCarlo);
-
-            tMenu.Abort(); // Per evitare rimanga in esecuzione anche dopo il termine della corsa
-
-            Console.SetCursorPosition(0, _coordinateMenu[1] + 6);
-            Console.WriteLine("\t\nProgramma finito, premi invio per terminare");
-            Console.ReadLine();
-        }
 
         /// <summary>
         /// Scrive sulla console sincronizzandosi con gli altri Thread
@@ -234,7 +192,7 @@ namespace ConsoleApp_CorsaFraAmici
         {
             lock (_lockConsole)
             {
-                _classifica++;
+                _classifica++; // Modifico una variabile condivisa, uso il lock.
             }
 
             ScriviCondiviso(_lockConsole, coordTraguardo, testaCorridore - 1, _classifica.ToString());
@@ -304,12 +262,14 @@ namespace ConsoleApp_CorsaFraAmici
             StampaStatoThreadEIsAlive(tAndrea, 10, 2, _lockConsole);
             StampaStatoThreadEIsAlive(tBaldo, 10, 2 + 4, _lockConsole);
             StampaStatoThreadEIsAlive(tCarlo, 10, 2 + 8, _lockConsole);
+            Thread.Sleep(25);
         }
 
         static void StampaStatoThreadEIsAlive(Thread th, int posX, int posY, object lck)
         {
             ScriviCondiviso(lck, posX, posY, $"Stato thread: {th.ThreadState}                               ");
             ScriviCondiviso(lck, posX + 60, posY, $"IsAlive: {th.IsAlive}      ");
+            
         }
         #endregion
 
@@ -433,5 +393,49 @@ namespace ConsoleApp_CorsaFraAmici
         }
         
         #endregion
+        [Obsolete] // Obsolete è per evitare di avere la segnalazione che t.Suspend() e t.Resume() sono obsoleti
+        static void Main(string[] args)
+        {
+            Console.Title = "Programmato da: Andrea Maria Castronovo - Classe: 4°I";
+            
+            Console.CursorVisible = false;
+
+            Thread tMenu = new Thread(GestisciMenu);
+            Pronti();
+
+            tMenu.Start();
+            
+            // Stampa iniziale
+            StampaStatiThread(tAndrea, tBaldo, tCarlo);
+
+            ScriviCondiviso(_lockConsole, 0, 16, "Clicca un tasto per far partire i corridori\n");
+            Console.ReadKey(true);
+            ScriviCondiviso(_lockConsole, 0, 16, "                                                                         ");
+
+            // Essendo la Console una risorsa condivisa, non possono scrivere tutti allo stesso tempo,
+            // c'è bisogno di un semaforo che "guidi" la scrittura.
+
+            tAndrea.Start(); // Esegue il codice nel metodo che gli abbiamo passato
+            tBaldo.Start();
+            tCarlo.Start();
+
+            // Stampa in tempo reale
+            while (tAndrea.IsAlive || tBaldo.IsAlive || tCarlo.IsAlive)
+            {
+                StampaStatiThread(tAndrea, tBaldo, tCarlo);
+            }
+
+            // Stampa finale
+            StampaStatiThread(tAndrea, tBaldo, tCarlo);
+
+            tMenu.Abort(); // Per evitare rimanga in esecuzione anche dopo il termine della corsa
+
+            Console.SetCursorPosition(0, _coordinateMenu[1] + 6);
+            Console.WriteLine("\t\nProgramma finito, premi invio per terminare");
+            Console.ReadLine();
+        }
+
+
+
     }
 }
